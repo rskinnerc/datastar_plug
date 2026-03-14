@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-14
+
+### Fixed
+
+- Fix ExDoc deprecation warning by replacing `:groups_for_functions` with
+  `:groups_for_docs` in documentation configuration.
+- Add LICENSE file to documentation extras so it's properly included and
+  referenced without warnings.
+
 ## [0.2.0] - 2026-03-14
 
 ### Added
@@ -73,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   POST/PUT/PATCH/DELETE requests (signals as the decoded JSON body). Returns
   `%{}` on parse failure so callers always receive a map.
 
-[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rskinnerc/datastar_plug/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rskinnerc/datastar_plug/releases/tag/v0.1.0
