@@ -94,11 +94,10 @@ defmodule DatastarTest do
     end
 
     test "returns {:error, conn} on a dead connection" do
-      # Simulate a disconnected conn by using a non-chunked conn
-      # (chunk/2 raises when the connection is not chunked - we patch around
-      #  this via the :error path of write_chunk/2)
+      # Simulate a disconnected conn by using a non-chunked conn.
+      # Plug.Conn.chunk/2 raises ArgumentError when conn.state != :chunked;
+      # check_connection/1 rescues that and returns {:error, conn}.
       bad_conn = conn(:get, "/")
-      # In Plug.Test a non-chunked conn returns {:error, :not_chunked} on chunk/2
       assert {:error, %Plug.Conn{}} = Datastar.check_connection(bad_conn)
     end
   end
@@ -403,6 +402,15 @@ defmodule DatastarTest do
         |> resp_body()
 
       refute body =~ "retry:"
+    end
+
+    test "emits retry: 0 when retry_duration is 0 (SSE allows 0ms)" do
+      body =
+        sse_conn()
+        |> Datastar.patch_fragment("<div id='x'>Hi</div>", retry_duration: 0)
+        |> resp_body()
+
+      assert body =~ "retry: 0"
     end
 
     test "id: and retry: lines appear after event: and before data: lines" do
@@ -780,6 +788,36 @@ defmodule DatastarTest do
     test "returns a Plug.Conn" do
       result = Datastar.remove_signals(sse_conn(), "loading")
       assert %Plug.Conn{} = result
+    end
+
+    test "raises ArgumentError for an empty path string" do
+      assert_raise ArgumentError, ~r/invalid signal path/, fn ->
+        Datastar.remove_signals(sse_conn(), "")
+      end
+    end
+
+    test "raises ArgumentError for a path with a leading dot" do
+      assert_raise ArgumentError, ~r/invalid signal path/, fn ->
+        Datastar.remove_signals(sse_conn(), ".user")
+      end
+    end
+
+    test "raises ArgumentError for a path with a trailing dot" do
+      assert_raise ArgumentError, ~r/invalid signal path/, fn ->
+        Datastar.remove_signals(sse_conn(), "user.")
+      end
+    end
+
+    test "raises ArgumentError for a path with consecutive dots" do
+      assert_raise ArgumentError, ~r/invalid signal path/, fn ->
+        Datastar.remove_signals(sse_conn(), "user..name")
+      end
+    end
+
+    test "raises ArgumentError for invalid paths anywhere in a list" do
+      assert_raise ArgumentError, ~r/invalid signal path/, fn ->
+        Datastar.remove_signals(sse_conn(), ["valid", ""])
+      end
     end
   end
 

@@ -497,6 +497,8 @@ defmodule Datastar do
       paths
       |> List.wrap()
       |> Enum.reduce(%{}, fn path, acc ->
+        validate_signal_path!(path)
+
         path
         |> String.split(".")
         |> set_nil_at_path(acc)
@@ -662,7 +664,7 @@ defmodule Datastar do
     id_line = if event_id, do: "id: #{event_id}\n", else: ""
 
     retry_line =
-      if is_integer(retry_duration) && retry_duration > 0,
+      if is_integer(retry_duration) && retry_duration >= 0,
         do: "retry: #{retry_duration}\n",
         else: ""
 
@@ -701,6 +703,15 @@ defmodule Datastar do
     if namespace not in @valid_namespaces do
       raise ArgumentError,
             "invalid namespace #{inspect(namespace)}. Must be one of: #{Enum.join(@valid_namespaces, ", ")}"
+    end
+  end
+
+  defp validate_signal_path!(path) when is_binary(path) do
+    segments = String.split(path, ".")
+
+    if path == "" or Enum.any?(segments, &(&1 == "")) do
+      raise ArgumentError,
+            "invalid signal path #{inspect(path)}. Path must be a non-empty string with no empty segments (e.g. \"user.name\")."
     end
   end
 end
