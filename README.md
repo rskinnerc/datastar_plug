@@ -24,7 +24,7 @@ Add `:datastar_plug` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:datastar_plug, "~> 0.1.0"}
+    {:datastar_plug, "~> 0.2.0"}
   ]
 end
 ```
@@ -39,6 +39,24 @@ No additional configuration is required. The package has two runtime
 dependencies: [`plug`](https://hex.pm/packages/plug) and
 [`jason`](https://hex.pm/packages/jason), both of which are already present
 in virtually every Phoenix application.
+
+---
+
+## What's New in v0.2.0
+
+- **`check_connection/1`** — detect client disconnects in long-running streams.
+- **`remove_signals/3`** — remove client signals by dot-notated path, with
+  correct merging of shared path prefixes.
+- **`:namespace` option** on `patch_fragment/3` — patch SVG or MathML
+  fragments.
+- **`:use_view_transition` option** on `patch_fragment/3` — animate patches
+  via the browser's View Transitions API.
+- **`:only_if_missing` option** on `patch_signals/3` — set default signal
+  values without overwriting existing ones.
+- **`:auto_remove` option** on `execute_script/3` — automatically remove the
+  injected `<script>` tag after execution.
+- **`:event_id` and `:retry_duration` options** on every SSE function — emit
+  the standard SSE `id:` and `retry:` fields for client-side replay support.
 
 ---
 
@@ -99,6 +117,39 @@ defmodule MyApp.Router do
 end
 ```
 
+### Long-running SSE streams with connection checking
+
+```elixir
+def stream(conn, _params) do
+  conn = Datastar.init_sse(conn)
+  stream_items(conn, MyApp.Items.all())
+end
+
+defp stream_items(conn, []), do: conn
+
+defp stream_items(conn, [item | rest]) do
+  case Datastar.check_connection(conn) do
+    {:ok, conn} ->
+      conn
+      |> Datastar.patch_fragment(render_item(item))
+      |> stream_items(rest)
+
+    {:error, _conn} ->
+      # Client disconnected — stop streaming silently
+      conn
+  end
+end
+```
+
+### Removing signals
+
+```elixir
+conn
+|> Datastar.init_sse()
+|> Datastar.remove_signals(["user.name", "user.email"])
+|> Datastar.close_sse()
+```
+
 ### Reading signals from GET requests
 
 Datastar serialises the entire client signal store as a JSON string in the
@@ -149,10 +200,12 @@ end
 |----------|-------------|
 | [`init_sse/1`](https://hexdocs.pm/datastar_plug/Datastar.html#init_sse/1) | Open a chunked SSE response. **Call first.** |
 | [`patch_fragment/3`](https://hexdocs.pm/datastar_plug/Datastar.html#patch_fragment/3) | Patch HTML into the DOM (`datastar-patch-elements`). |
-| [`patch_signals/2`](https://hexdocs.pm/datastar_plug/Datastar.html#patch_signals/2) | Merge values into the client signal store (`datastar-patch-signals`). |
-| [`execute_script/2`](https://hexdocs.pm/datastar_plug/Datastar.html#execute_script/2) | Execute JavaScript on the client (appends a `<script>` tag). |
-| [`redirect_to/2`](https://hexdocs.pm/datastar_plug/Datastar.html#redirect_to/2) | Redirect the browser via `window.location.href`. |
-| [`remove_fragment/2`](https://hexdocs.pm/datastar_plug/Datastar.html#remove_fragment/2) | Remove a DOM element by CSS selector. |
+| [`remove_fragment/3`](https://hexdocs.pm/datastar_plug/Datastar.html#remove_fragment/3) | Remove a DOM element by CSS selector. |
+| [`patch_signals/3`](https://hexdocs.pm/datastar_plug/Datastar.html#patch_signals/3) | Merge values into the client signal store (`datastar-patch-signals`). |
+| [`remove_signals/3`](https://hexdocs.pm/datastar_plug/Datastar.html#remove_signals/3) | Remove one or more signals by dot-notated path. |
+| [`execute_script/3`](https://hexdocs.pm/datastar_plug/Datastar.html#execute_script/3) | Execute JavaScript on the client (appends a `<script>` tag). |
+| [`redirect_to/3`](https://hexdocs.pm/datastar_plug/Datastar.html#redirect_to/3) | Redirect the browser via `window.location.href`. |
+| [`check_connection/1`](https://hexdocs.pm/datastar_plug/Datastar.html#check_connection/1) | Verify the SSE connection is still alive. |
 | [`close_sse/1`](https://hexdocs.pm/datastar_plug/Datastar.html#close_sse/1) | No-op pipeline terminator for readability. |
 | [`parse_signals/1`](https://hexdocs.pm/datastar_plug/Datastar.html#parse_signals/1) | Decode Datastar signals from GET or POST params. |
 

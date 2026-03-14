@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-14
+
+### Added
+
+- `Datastar.check_connection/1` — Sends a blank SSE comment to the client to
+  verify the connection is still alive. Returns `{:ok, conn}` on success or
+  `{:error, conn}` when the client has disconnected. Useful for long-running
+  SSE streams.
+- `Datastar.remove_signals/3` — Removes one or more client-side signals by
+  sending a `datastar-patch-signals` event with `nil` values. Accepts a single
+  dot-notated path string or a list of paths; shared prefixes are merged
+  correctly into a single JSON payload.
+- `patch_fragment/3` — `:namespace` option — sets the XML namespace for new
+  elements (`"html"` default, `"svg"`, or `"mathml"`).
+- `patch_fragment/3` — `:use_view_transition` option — when `true`, wraps the
+  DOM patch in the browser's View Transitions API.
+- `patch_signals/3` — `:only_if_missing` option — only patches signals that do
+  not already exist in the client signal store.
+- `execute_script/3` — `:auto_remove` option — when `true`, adds
+  `data-effect="el.remove()"` to the injected `<script>` tag so Datastar
+  removes it from the DOM after execution.
+- All SSE-emitting functions now accept `:event_id` and `:retry_duration`
+  keyword options, emitting the standard SSE `id:` and `retry:` fields
+  respectively.
+
+### Changed
+
+- Valid merge modes for `patch_fragment/3` are now `"outer"`, `"inner"`,
+  `"replace"`, `"prepend"`, `"append"`, `"before"`, `"after"`, and `"remove"`.
+  The previously advertised `"morph"` mode has been removed to align with the
+  Datastar RC.8+ protocol, which uses `"outer"` as the default morph behaviour.
+
+### Fixed
+
+- `check_connection/1` now rescues `ArgumentError` (raised by `Plug.Conn.chunk/2`
+  on non-chunked connections) and returns `{:error, conn}` instead of crashing.
+
 ## [0.1.0] - 2026-03-14
 
 ### Added
@@ -36,5 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   POST/PUT/PATCH/DELETE requests (signals as the decoded JSON body). Returns
   `%{}` on parse failure so callers always receive a map.
 
-[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rskinnerc/datastar_plug/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rskinnerc/datastar_plug/releases/tag/v0.1.0
