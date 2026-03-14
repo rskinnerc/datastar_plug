@@ -93,4 +93,4 @@ jobs:
         run: mkdir -p priv/plts
 
       - name: Run Dialyzer
-        run: mix dialyzer --no-check
+        run: mix dialyzer
