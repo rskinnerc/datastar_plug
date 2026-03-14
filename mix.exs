@@ -1,7 +1,7 @@
 defmodule DatastarPlug.MixProject do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.2.1"
   @source_url "https://github.com/rskinnerc/datastar_plug"
 
   def project do
@@ -68,13 +68,15 @@ defmodule DatastarPlug.MixProject do
       source_ref: "v#{@version}",
       extras: [
         "README.md",
-        "CHANGELOG.md"
+        "CHANGELOG.md",
+        "LICENSE"
       ],
       groups_for_extras: [
         Guides: ~r/README/,
-        Changelog: ~r/CHANGELOG/
+        Changelog: ~r/CHANGELOG/,
+        License: ~r/LICENSE/
       ],
-      groups_for_functions: [
+      groups_for_docs: [
         "Connection Lifecycle": &(&1[:name] in [:init_sse, :close_sse]),
         "Patching the DOM": &(&1[:name] in [:patch_fragment, :remove_fragment, :execute_script]),
         Signals: &(&1[:name] in [:patch_signals]),
