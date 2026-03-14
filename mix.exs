@@ -1,7 +1,7 @@
 defmodule DatastarPlug.MixProject do
   use Mix.Project
 
-  @version "0.2.1"
+  @version "0.2.2"
   @source_url "https://github.com/rskinnerc/datastar_plug"
 
   def project do
@@ -24,6 +24,10 @@ defmodule DatastarPlug.MixProject do
         plt_local_path: "priv/plts"
       ]
     ]
+  end
+
+  def cli do
+    [preferred_envs: ["test.ci": :test]]
   end
 
   def application do
