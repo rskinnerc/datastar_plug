@@ -229,7 +229,7 @@ The blank line (`\n\n`) terminates the event. Multi-line HTML values (from
 
 ### `datastar-patch-elements`
 
-Used by `patch_fragment/3`, `execute_script/2`, `remove_fragment/2`.
+Used by `patch_fragment/3`, `execute_script/3`, `remove_fragment/3`.
 
 ```
 event: datastar-patch-elements
@@ -241,7 +241,7 @@ data: elements <p>Hello, world!</p>
 
 ### `datastar-patch-signals`
 
-Used by `patch_signals/2`.
+Used by `patch_signals/3`.
 
 ```
 event: datastar-patch-signals
@@ -265,7 +265,7 @@ merged into the DOM:
 | `"append"` | Inserts after the last child of the target. |
 | `"before"` | Inserts immediately before the target element. |
 | `"after"` | Inserts immediately after the target element. |
-| `"remove"` | Removes the target (use `remove_fragment/2` instead). |
+| `"remove"` | Removes the target (use `remove_fragment/3` instead). |
 
 ---
 
@@ -278,11 +278,11 @@ for the full specification. Key points for this library:
   part of the HTML originates from user input, **sanitise it first** to prevent
   XSS. Use `Phoenix.HTML.html_escape/1` or a dedicated HTML sanitiser.
 
-- **`execute_script/2`** — Executes arbitrary JavaScript on the client. Only
+- **`execute_script/3`** — Executes arbitrary JavaScript on the client. Only
   pass **server-controlled** strings. Never interpolate user input into the
   script.
 
-- **`redirect_to/2`** — The URL is `Jason.encode!/1`-encoded before embedding,
+- **`redirect_to/3`** — The URL is `Jason.encode!/1`-encoded before embedding,
   preventing injection via single-quotes, backslashes, or `</script>` in the
   URL string.
 

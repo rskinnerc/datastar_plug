@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-03-14
+
+### Fixed
+
+- Corrected stale function-arity references in the README: `execute_script/2`,
+  `remove_fragment/2`, `patch_signals/2`, and `redirect_to/2` have been updated
+  to their correct current arities (`/3`) in the SSE Protocol, Merge Modes, and
+  Security sections.
+- Added `cli/0` to `mix.exs` with `preferred_envs: ["test.ci": :test]` so the
+  `mix test.ci` alias runs in the correct `:test` environment without requiring
+  `MIX_ENV=test` to be set manually.
+
 ## [0.2.1] - 2026-03-14
 
 ### Fixed
@@ -82,7 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   POST/PUT/PATCH/DELETE requests (signals as the decoded JSON body). Returns
   `%{}` on parse failure so callers always receive a map.
 
-[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rskinnerc/datastar_plug/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rskinnerc/datastar_plug/releases/tag/v0.1.0
