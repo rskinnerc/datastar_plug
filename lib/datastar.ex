@@ -109,11 +109,14 @@ defmodule Datastar do
   @typedoc """
   Controls how `patch_fragment/3` merges incoming HTML into the existing DOM.
 
+  These values correspond directly to the `mode` data line in the Datastar
+  SSE protocol as implemented in the Datastar JS client (RC.8+).
+
   | Value | Behaviour |
   |-------|-----------|
-  | `"morph"` | ID-based morphing diff (default). Matches top-level elements by their `id` attribute. |
-  | `"inner"` | Replaces the *inner* HTML of the target element. |
-  | `"outer"` | Replaces the *outer* HTML of the target element (element itself included). |
+  | `"outer"` | **Default.** Morphs the element in place. Without a `:selector`, matches top-level elements by `id` and morphs each one in the DOM. |
+  | `"inner"` | Replaces the *inner* HTML of the target element using morphing. |
+  | `"replace"` | Replaces the target element with `replaceWith` (no morphing diff). |
   | `"prepend"` | Inserts HTML before the first child of the target. |
   | `"append"` | Inserts HTML after the last child of the target. |
   | `"before"` | Inserts HTML immediately before the target element. |
@@ -123,8 +126,8 @@ defmodule Datastar do
   @type merge_mode ::
           String.t()
 
-  @valid_merge_modes ~w(morph inner outer prepend append before after remove)
-  @default_merge_mode "morph"
+  @valid_merge_modes ~w(outer inner replace prepend append before after remove)
+  @default_merge_mode "outer"
 
   @doc """
   Initialises a chunked SSE response on the connection.
@@ -178,7 +181,7 @@ defmodule Datastar do
     When omitted, Datastar matches top-level elements by `id` in `"morph"` mode.
     For modes like `"inner"`, `"prepend"`, `"append"`, etc., the Datastar client
     expects a selector, so callers should provide one when using those modes.
-  - `:merge_mode` — How to apply the patch. Defaults to `"morph"`.
+  - `:merge_mode` — How to apply the patch. Defaults to `"outer"`.
     See `t:merge_mode/0` for all allowed values.
 
   ## Examples
@@ -212,8 +215,8 @@ defmodule Datastar do
 
     selector_line = if selector, do: "data: selector #{selector}\n", else: ""
 
-    # Only emit mode line when it differs from Datastar's default merge mode ("morph").
-    # The Datastar client defaults to "morph", which matches @default_merge_mode,
+    # Only emit mode line when it differs from Datastar's default merge mode ("outer").
+    # The Datastar client defaults to "outer", which matches @default_merge_mode,
     # so we only need to send the line when explicitly overriding.
     mode_line = if mode == @default_merge_mode, do: "", else: "data: mode #{mode}\n"
 
@@ -408,7 +411,7 @@ defmodule Datastar do
       end
 
   """
-  @spec parse_signals(map()) :: map()
+  @spec parse_signals(any()) :: map()
   def parse_signals(%{"datastar" => json}) when is_binary(json) do
     case Jason.decode(json) do
       {:ok, signals} when is_map(signals) -> signals

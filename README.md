@@ -205,9 +205,9 @@ merged into the DOM:
 
 | Mode | Behaviour |
 |------|-----------|
-| `"morph"` | ID-based morphing diff **(default)**. Matches top-level elements by `id`. |
-| `"inner"` | Replaces inner HTML of the target element. |
-| `"outer"` | Replaces outer HTML (element itself included). |
+| `"outer"` | **(Default)** Morphs the element in place. Without a `:selector`, matches top-level elements by `id` and morphs each one. |
+| `"inner"` | Replaces inner HTML of the target element using morphing. |
+| `"replace"` | Replaces the target element with `replaceWith` (no morphing diff). |
 | `"prepend"` | Inserts before the first child of the target. |
 | `"append"` | Inserts after the last child of the target. |
 | `"before"` | Inserts immediately before the target element. |

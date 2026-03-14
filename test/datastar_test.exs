@@ -92,7 +92,7 @@ defmodule DatastarTest do
       assert body =~ "data: elements </div>"
     end
 
-    test "does NOT emit a mode line when using default morph mode" do
+    test "does NOT emit a mode line when using default outer mode" do
       body =
         sse_conn()
         |> Datastar.patch_fragment("<div id='x'>Hi</div>")
@@ -101,7 +101,7 @@ defmodule DatastarTest do
       refute body =~ "data: mode"
     end
 
-    test "emits data: mode line when merge_mode is not morph" do
+    test "emits data: mode line when merge_mode is not outer (the default)" do
       body =
         sse_conn()
         |> Datastar.patch_fragment("<li>Item</li>", merge_mode: "append", selector: "#list")
@@ -149,7 +149,7 @@ defmodule DatastarTest do
     end
 
     test "all valid merge modes are accepted without raising" do
-      for mode <- ~w(morph inner outer prepend append before after remove) do
+      for mode <- ~w(outer inner replace prepend append before after remove) do
         assert %Plug.Conn{} =
                  Datastar.patch_fragment(sse_conn(), "<div id='x'>Hi</div>",
                    merge_mode: mode,
@@ -486,7 +486,7 @@ defmodule DatastarTest do
       assert Datastar.parse_signals(%{"datastar" => "[1,2,3]"}) == %{}
     end
 
-    test "returns an empty map when the datastar value is not a string" do
+    test "passes through the map when the datastar value is not a string" do
       assert Datastar.parse_signals(%{"datastar" => 42}) == %{"datastar" => 42}
     end
   end
