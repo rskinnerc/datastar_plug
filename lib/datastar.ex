@@ -8,6 +8,11 @@ defmodule Datastar do
   running in the browser receives these events and applies DOM patches, signal
   updates, script executions, and redirects — all without a full-page reload.
 
+  > #### Compatibility {: .info}
+  >
+  > This library is built for **Datastar RC.8+**. If you're using an earlier
+  > version, some functions or options may not work as expected.
+
   ## Installation
 
   Add `datastar_plug` to your `mix.exs` dependencies:
@@ -25,18 +30,35 @@ defmodule Datastar do
   ### Phoenix controller
 
   ```elixir
-  defmodule MyAppWeb.DashboardController do
+  defmodule MyAppWeb.ItemController do
     use MyAppWeb, :controller
     alias Datastar
+    alias MyApp.Items
 
-    def show(conn, params) do
+    # GET /items/:id/edit — triggered by a Datastar `data-init` attribute
+    def edit(conn, %{"id" => id} = params) do
       signals = Datastar.parse_signals(params)
-      html = render_to_string(conn, :dashboard, assigns)
+      item = Items.get!(id)
+      form_html = render_to_string(conn, :edit_form, item: item)
 
       conn
       |> Datastar.init_sse()
-      |> Datastar.patch_fragment(html)
-      |> Datastar.patch_signals(%{loaded: true})
+      |> Datastar.patch_fragment(form_html, selector: "#item-form")
+      |> Datastar.patch_signals(%{editMode: true, itemId: id})
+      |> Datastar.close_sse()
+    end
+
+    # PUT /items/:id — save changes and update the display
+    def update(conn, %{"id" => id} = params) do
+      signals = Datastar.parse_signals(params)
+      item_attrs = Map.take(signals, ["title", "description"])
+      {:ok, item} = Items.update(id, item_attrs)
+      display_html = render_to_string(conn, :display, item: item)
+
+      conn
+      |> Datastar.init_sse()
+      |> Datastar.patch_fragment(display_html, selector: "#item-display")
+      |> Datastar.patch_signals(%{editMode: false})
       |> Datastar.close_sse()
     end
   end
@@ -304,7 +326,7 @@ defmodule Datastar do
       # Default morph — element id must exist in the DOM
       conn |> Datastar.patch_fragment(~s(<div id="greeting">Hello!</div>))
 
-      # Replace inner HTML of a container
+      # Append a new item to a list
       conn |> Datastar.patch_fragment("<li>New item</li>",
         selector: "#item-list",
         merge_mode: "append"

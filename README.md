@@ -15,6 +15,8 @@ receives these events and applies DOM patches, signal updates, script
 executions, and redirects — all without a full-page reload and without any
 WebSocket or long-polling infrastructure.
 
+See it in action on the [live demo](https://datastar.skinner.com.co).
+
 ---
 
 ## Installation
@@ -39,6 +41,11 @@ No additional configuration is required. The package has two runtime
 dependencies: [`plug`](https://hex.pm/packages/plug) and
 [`jason`](https://hex.pm/packages/jason), both of which are already present
 in virtually every Phoenix application.
+
+> #### Compatibility {: .info}
+>
+> This package is built for **Datastar RC.8+**. If you're using an earlier
+> version, some functions or options may not work as expected.
 
 ---
 
@@ -71,27 +78,30 @@ defmodule MyAppWeb.ItemController do
   alias Datastar
   alias MyApp.Items
 
-  # GET /items/:id/refresh — triggered by a Datastar `data-on-load` attribute
-  def refresh(conn, params) do
+  # GET /items/:id/edit — triggered by a Datastar `data-init` attribute
+  def edit(conn, %{"id" => id} = params) do
     signals = Datastar.parse_signals(params)
-    item    = Items.get!(signals["itemId"])
-    html    = Phoenix.View.render_to_string(MyAppWeb.ItemView, "card.html", item: item)
+    item = Items.get!(id)
+    form_html = Phoenix.View.render_to_string(MyAppWeb.ItemView, "edit_form.html", item: item)
 
     conn
     |> Datastar.init_sse()
-    |> Datastar.patch_fragment(html)
-    |> Datastar.patch_signals(%{itemLoaded: true})
+    |> Datastar.patch_fragment(form_html, selector: "#item-form")
+    |> Datastar.patch_signals(%{editMode: true, itemId: id})
     |> Datastar.close_sse()
   end
 
-  # DELETE /items/:id — delete and remove the card from the DOM
-  def delete(conn, %{"id" => id}) do
-    Items.delete!(id)
+  # PUT /items/:id — save changes and update the display
+  def update(conn, %{"id" => id} = params) do
+    signals = Datastar.parse_signals(params)
+    item_attrs = Map.take(signals, ["title", "description"])
+    {:ok, item} = Items.update(id, item_attrs)
+    display_html = Phoenix.View.render_to_string(MyAppWeb.ItemView, "display.html", item: item)
 
     conn
     |> Datastar.init_sse()
-    |> Datastar.remove_fragment("#item-#{id}")
-    |> Datastar.patch_signals(%{count: Items.count()})
+    |> Datastar.patch_fragment(display_html, selector: "#item-display")
+    |> Datastar.patch_signals(%{editMode: false})
     |> Datastar.close_sse()
   end
 end

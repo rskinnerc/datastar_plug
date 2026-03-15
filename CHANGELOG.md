@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-03-14
+
+### Fixed
+
+- Corrected Datastar attribute from `data-on-load` to `data-init` in documentation
+  examples (reflects the correct Datastar API).
+- Fixed misleading code comment in `patch_fragment/3` docs that said "Replace
+  inner HTML" when the example was actually appending content.
+
+### Improved
+
+- Enhanced Phoenix controller example in both library docs and README to show a
+  more realistic workflow with form editing and updates.
+- Added explicit **Datastar RC.8+** compatibility notice in docs to clarify
+  which versions of the Datastar client are supported.
+- Added link to [live demo](https://datastar.skinner.com.co) in README to help
+  users see the package in action.
+
 ## [0.2.2] - 2026-03-14
 
 ### Fixed
@@ -94,7 +112,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   POST/PUT/PATCH/DELETE requests (signals as the decoded JSON body). Returns
   `%{}` on parse failure so callers always receive a map.
 
-[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/rskinnerc/datastar_plug/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rskinnerc/datastar_plug/compare/v0.1.0...v0.2.0
